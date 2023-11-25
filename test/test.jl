@@ -64,14 +64,18 @@ println("powerset: \n", DA)
 println("excludable_alts: \n", Xalts)
 
 ##
-#O_da = parseformula(Only(base, Xalts, context = "□"))
+O_da = parseformula(Only(base, Xalts, context = "□"))
 #check_theory(worlds, edges, no_winner, O_da)
 #check_theory(worlds, edges, one_loser, O_da)
 #check_theory(worlds, edges, one_winner_var, O_da)
 #check_theory(worlds, edges, one_winner_no_var, O_da)
 #check_theory(worlds, edges, all_winners, O_da)
 
-O_da = parseformula(Only(base, Xalts, context = "◊"))
+#O_da = parseformula(Only(base, Xalts, context = "◊"))
+
+#@XXalts = excludable_alts_of_alt(Xalts)
+#@show O_da = parseformula(Only_XDA(base, XXalts, context = "□"))
+
 println("No winner:")
 check_theory(worlds, edges, no_winner, O_da)
 println("---")

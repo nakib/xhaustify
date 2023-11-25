@@ -37,11 +37,10 @@ function reduce_binary_op(op::String, s::Set{String})
     # {"b", "c", "a", ...} -> "(a*b*c*...)"
     
     col = s |> collect |> sort
-    if size(col)[1] > 1
-        return "("*col[1]*mapreduce(a -> op*a, *, col[2:end])*")"
-    else
+    if size(col)[1] == 1
         return col[1]
     end
+    return "("*col[1]*mapreduce(a -> op*a, *, col[2:end])*")"
 end
 
 function excludable_alts(alts::Set{Set{String}}, base::Set{String})
@@ -51,6 +50,37 @@ function excludable_alts(alts::Set{Set{String}}, base::Set{String})
     
     filter(a -> !entails(reduce_binary_op("∨", base),
                          reduce_binary_op("∨", a)), alts)
+end
+
+function excludable_alts_of_alt(Xalts::Set{Set{String}})
+    # Define the set of alts to be excluded during the preexhaustification
+    # of a domain alternative.
+    
+    XXalts = Dict()
+    for x in Xalts
+        gather = Set{Set{String}}()
+        for y in Xalts
+            if(length(x) == length(y) && x != y)
+                push!(gather, y)
+            end
+        end
+        XXalts[x] = excludable_alts(gather, x)
+    end
+    return XXalts
+end
+
+function Only_XDA(base::Set{String}, XXalts; context = "")
+    # Create the syntax for Only interpreted relative to the XDA.
+    
+    base_str = context*reduce_binary_op("∨", base)
+    
+    exp_str = []
+    for key in keys(XXalts)
+        push!(exp_str, "("*Only(key, XXalts[key], context = context)*")")
+    end
+
+    base_str*reduce(*,
+                    [binary_op("∧", "", unary_op("¬", x)) for x in sort(exp_str)])
 end
 
 function Only(base::Set{String}, Xalts::Set{Set{String}}; context = "")
